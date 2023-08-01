@@ -1,11 +1,10 @@
-
-
-def main():
-    test_is_unique()
+ 
 
 def test_is_unique():
-    print("is_unique result (avbbc): ",is_unique("avbbc"))
-    print("is_unique result (abcde): ",is_unique("abc"))
+    # print("is_unique result (avbbc): ",is_unique("avbbc"))
+    # print("is_unique result (abcde): ",is_unique("abc"))
+    assert is_unique("avbbc") == False
+    assert is_unique("abc") == True
 
 # Implement an algorithm to determine if a string has all unique characters
 def is_unique(input: str) -> bool:
@@ -21,4 +20,4 @@ def is_unique(input: str) -> bool:
     return True
 
 if __name__ == "__main__":
-    main()
+    test_is_unique()
