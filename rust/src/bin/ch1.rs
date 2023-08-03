@@ -23,6 +23,8 @@ fn is_unique(input: String) -> bool {
     true
 }
 
+// ------------------------------------
+
 // interview question 1.2
 // given two strings. write a method to decide if one is a permutation of the other.
 // returns true if strings are identical, otherwise false.
@@ -40,6 +42,8 @@ fn check_permutation(str1: String, str2: String) -> bool {
 
     chars1 == chars2
 }
+
+// ------------------------------------
 
 // interview question 1.3
 // URLify: Write a method to replace all spaces in a string with '%20'. You may assume that the string
@@ -62,6 +66,8 @@ fn url_ify(input: String) -> String {
     }
     new_str.concat()
 }
+
+// ------------------------------------
 
 // interview question 1.4
 // Palindrome Permutation: Given a string, write a function to check if it is a permutation of a palin­
@@ -167,10 +173,42 @@ fn one_edit(longer: String, shorter: String) -> bool {
 // "compressed" string would not become smaller than the original string, your method should return
 // the original string. You can assume the string has only uppercase and lowercase letters (a - z).
 fn string_compression(s: String) -> String {
-    if s.is_empty() { return s;}
-    
+    let mut compressed = String::new();
+    if s.is_empty() || s.clone().chars().any(|x| x.is_numeric()) { 
+        return compressed;
+    }
+    let mut chars = s.chars();
 
-    "".to_string()
+    // Pop off the first character as our loop prelude
+    let mut prev = chars.next().unwrap();
+    println!("{prev}");
+    prev = prev.to_lowercase().next().unwrap();
+    println!("{prev}");
+    // Initialize a count of consecutive identical characters
+    let mut count = 1;
+
+    // And iterate over the rest of the string
+    for c in chars {
+        if c.to_lowercase().next().unwrap() == prev {
+            count += 1;
+        } else {
+            compressed.push(prev);
+            compressed.push_str(&count.to_string());
+            prev = c;
+            count = 1;
+        }
+        if compressed.len() >= s.len() {
+            return s.to_string();
+        }
+    }
+    // Now we're at the end of the string, so we need to push the last character(s)
+    compressed.push(prev);
+    compressed.push_str(&count.to_string());
+    if compressed.len() >= s.len() {
+        return s.to_string();
+    }
+    // Finished, return the compressed string
+    compressed
 }
 
 // ------------------------------------
@@ -181,25 +219,27 @@ mod tests {
 
     #[test]
     fn check_if_unique() {
-        assert_eq!(is_unique(String::from("")), false);
-        assert_eq!(is_unique(String::from("hash")), false);
-        assert_eq!(is_unique(String::from("tuesday")), true);
+        let test_cases = [("", false), ("maps", true), ("shall", false)];
+
+        for case in test_cases {
+            assert_eq!(is_unique(case.0.to_string()), case.1);
+        }
     }
 
     #[test]
     fn check_check_permutation() {
-        assert_eq!(
-            check_permutation(String::from("was"), String::from("")),
-            false
-        );
-        assert_eq!(
-            check_permutation(String::from("zen"), String::from("maps")),
-            false
-        );
-        assert_eq!(
-            check_permutation(String::from("red"), String::from("erd")),
-            true
-        );
+        let test_cases = [
+            ("was", "", false),
+            ("zen", "maps", false),
+            ("red", "erd", true),
+        ];
+
+        for case in test_cases {
+            assert_eq!(
+                check_permutation(case.0.to_string(), case.1.to_string()),
+                case.2
+            );
+        }
     }
     #[test]
     fn check_url_ify() {
@@ -229,6 +269,23 @@ mod tests {
 
         for case in test_cases {
             assert_eq!(one_away(case.0.to_string(), case.1.to_string()), case.2);
+        }
+    }
+
+    #[test]
+    fn check_string_compression() {
+        let test_cases = [
+            ("aabcccccaaa", "a2b1c5a3"),
+            ("abcdef", "abcdef"),
+            ("aabb", "aabb"),
+            ("aaa", "a3"),
+            ("a", "a"),
+            ("", ""),
+            
+        ];
+
+        for case in test_cases { 
+            assert_eq!(string_compression(case.0.to_string()), case.1.to_string());
         }
     }
 }
