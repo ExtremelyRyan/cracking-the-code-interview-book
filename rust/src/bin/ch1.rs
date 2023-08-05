@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-
+// needed help from https://github.com/dan-fritchman/CtCI-6th-Edition-Rust/blob/main/src/chapter_01/
 use std::collections::HashMap;
 
 fn main() {}
@@ -74,7 +74,7 @@ fn url_ify(input: String) -> String {
 // drome. A palindrome is a word or phrase that is the same forwards and backwards. A permutation
 // is a rearrangement of letters. The palindrome does not need to be limited to just dictionary words.
 fn palindrome_permutation(input: String) -> bool {
-    let mut hmap: HashMap<char, usize> = HashMap::new();
+    let mut hmap: HashMap<char, u32> = HashMap::new();
 
     // stupid that this took me so long to catch, but we have to make sure we
     // remove all the spaces from the word first.
@@ -83,16 +83,14 @@ fn palindrome_permutation(input: String) -> bool {
     // go through all of the characters in the string and tally up how much we have of each.
     for c in s.chars() {
         match hmap.contains_key(&c) {
-            true => {
+            true => { 
                 hmap.entry(c).and_modify(|x| *x += 1);
             }
             false => {
                 hmap.insert(c, 1);
             }
         }
-    }
-
-    dbg!(&hmap);
+    } 
 
     // this is our tracker to count how many odd values we have in the map
     let mut found_odd: usize = 0;
@@ -113,7 +111,7 @@ fn palindrome_permutation(input: String) -> bool {
 // One Away: There are three types of edits that can be performed on strings: insert a character,
 // remove a character, or replace a character. Given two strings, write a function to check if they are
 // one edit (or zero edits) away.
-// needed help from https://github.com/dan-fritchman/CtCI-6th-Edition-Rust/blob/main/src/chapter_01/p05_one_away.rs
+
 fn one_away(input1: String, input2: String) -> bool {
     let diff: i16 = input1.len() as i16 - input2.len() as i16;
 
@@ -132,17 +130,13 @@ fn same_len(s1: String, s2: String) -> bool {
     let mut s2_chars = s2.chars();
 
     for ch1 in s1.chars() {
-        match ch1 != s2_chars.next().unwrap() {
-            true => {
-                // found our mis-match
-                if found_differnece {
-                    // bail out if we find more than one.
-                    return false;
-                }
-                //
-                found_differnece = true;
-            }
-            false => (),
+        if ch1 != s2_chars.next().unwrap() {
+            // found our mis-match
+            if found_differnece {
+                // bail out if we find more than one.
+                return false;
+            } 
+            found_differnece = true;
         }
     }
     true
@@ -212,6 +206,38 @@ fn string_compression(s: String) -> String {
 }
 
 // ------------------------------------
+ 
+// Rotate Matrix: 
+// Given an image represented by an NxN matrix, where each pixel in the image is 4 bytes,
+// write a method to rotate the image by 90 degrees.
+// Can you do this in place? 
+
+/// Primary Implementation Method
+///
+/// Rotate 90 degrees clockwise, inline, running a "layer" at a time from the matrix exterior to center.
+/// Note the ultra-cool const-generic usage.
+///
+pub fn rotate_matrix<const N: usize>(mat: &mut [[isize; N]; N]) {
+    for layer in 0..N / 2 {
+        let last = N - 1 - layer;
+        for idx in layer..last {
+            // The reverse-index, used for rows & cols moving "backward"
+            let rev = N - 1 - idx;
+            // Use one temporary to store the initial top-left
+            let temp = mat[layer][idx];
+            // Move left to top
+            mat[layer][idx] = mat[rev][layer];
+            // Move bottom to left
+            mat[rev][layer] = mat[last][rev];
+            // Move right to bottom
+            mat[last][rev] = mat[idx][last];
+            // Move top to right, via the temporary
+            mat[idx][last] = temp;
+        }
+    }
+}
+
+
 
 #[cfg(test)]
 mod tests {
@@ -250,6 +276,7 @@ mod tests {
     #[test]
     fn check_palindrome_permutation() {
         assert_eq!(palindrome_permutation(String::from("atco cta")), true);
+        assert_eq!(palindrome_permutation(String::from("racecar")), true);
         assert_eq!(palindrome_permutation(String::from("atco www")), false);
     }
 
@@ -275,17 +302,46 @@ mod tests {
     #[test]
     fn check_string_compression() {
         let test_cases = [
+            ("1111111545555", ""),
             ("aabcccccaaa", "a2b1c5a3"),
             ("abcdef", "abcdef"),
             ("aabb", "aabb"),
             ("aaa", "a3"),
             ("a", "a"),
             ("", ""),
-            
         ];
 
         for case in test_cases { 
             assert_eq!(string_compression(case.0.to_string()), case.1.to_string());
         }
     }
+
+    #[test]
+fn test_rotate_matrix() {
+    let mut test_case = (
+        [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+        [[7, 4, 1], [8, 5, 2], [9, 6, 3]],
+    );
+    rotate_matrix(&mut test_case.0);
+    assert_eq!(test_case.0, test_case.1);
+
+    let mut test_case = (
+        [
+            [1, 2, 3, 4, 5],
+            [6, 7, 8, 9, 10],
+            [11, 12, 13, 14, 15],
+            [16, 17, 18, 19, 20],
+            [21, 22, 23, 24, 25],
+        ],
+        [
+            [21, 16, 11, 6, 1],
+            [22, 17, 12, 7, 2],
+            [23, 18, 13, 8, 3],
+            [24, 19, 14, 9, 4],
+            [25, 20, 15, 10, 5],
+        ],
+    );
+    rotate_matrix(&mut test_case.0);
+    assert_eq!(test_case.0, test_case.1);
+}
 }
